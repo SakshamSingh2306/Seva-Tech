@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seva Tech — Point your camera at a leaf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- ONNX Runtime Web — runs the real trained CNN entirely client-side -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8 6 4 9 4 14a8 8 0 0016 0c0-5-4-8-8-12z" stroke="#E3B23C" stroke-width="1.5"/><path d="M12 6v14M12 12c-2-2-4-2-5-1M12 15c2-1.5 4-1 5 0" stroke="#5B8C4A" stroke-width="1.3"/></svg>
+      Seva Tech
+    </a>
+    <nav class="nav-links">
+      <a href="#scan">Scan a leaf</a>
+      <a href="#how">How it works</a>
+      <a href="#library">Disease library</a>
+    </nav>
+    <a href="#scan" class="nav-cta">Try it now</a>
+  </div>
+</header>
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Field diagnosis, from your phone</div>
+      <h1>Point your camera at a leaf. Know <em>in seconds.</em></h1>
+      <p>Seva Tech runs a real convolutional neural network — trained from scratch on the PlantVillage dataset — directly in your browser to spot spotting, discoloration, and wilt patterns tied to specific crop diseases.</p>
+      <div class="hero-actions">
+        <a href="#scan" class="btn-primary">Scan a photo</a>
+        <a href="#how" class="btn-ghost">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 300 300">
+        <defs>
+          <linearGradient id="sweepGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E3B23C" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#E3B23C" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#E3B23C" stop-opacity="0"/>
+          </linearGradient>
+          <clipPath id="leafClip">
+            <path d="M150 30C90 60 45 110 45 175c0 58 47 95 105 95s105-37 105-95c0-65-45-115-105-145z"/>
+          </clipPath>
+        </defs>
+        <path class="leaf-outline" d="M150 30C90 60 45 110 45 175c0 58 47 95 105 95s105-37 105-95c0-65-45-115-105-145z"/>
+        <g clip-path="url(#leafClip)">
+          <rect class="scan-sweep" x="0" y="-260" width="300" height="120"/>
+        </g>
+        <path class="vein-line v1" d="M150 55V265"/>
+        <path class="vein-line v2" d="M150 100C120 95 95 100 78 118"/>
+        <path class="vein-line v3" d="M150 100C180 95 205 100 222 118"/>
+        <path class="vein-line v4" d="M150 150C118 145 90 152 70 172"/>
+        <path class="vein-line v5" d="M150 150C182 145 210 152 230 172"/>
+        <path class="vein-line v6" d="M150 200C125 197 100 203 85 220"/>
+      </svg>
+    </div>
+  </div>
+</section>
+<section class="dark" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Three steps, no lab required</div>
+      <h2>From worried glance to a clear next step</h2>
+      <p>No sample bags, no waiting for a visit. Just a phone and a few seconds in the field.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num mono">01</div>
+        <h3>Capture</h3>
+        <p>Photograph the affected leaf in daylight, close enough that the spots or discoloration fill the frame.</p>
+      </div>
+      <div class="step">
+        <div class="num mono">02</div>
+        <h3>Analyze</h3>
+        <p>A 5-layer convolutional network — running on-device via ONNX Runtime — processes the image through its learned filters.</p>
+      </div>
+      <div class="step">
+        <div class="num mono">03</div>
+        <h3>Act</h3>
+        <p>Get a plain-language diagnosis with severity, and the treatment steps to take today, not next week.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="scan">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Try the scanner</div>
+      <h2>Upload a leaf photo</h2>
+      <p>This demo runs a compact CNN checkpoint trained on 10 PlantVillage classes. The same architecture, trained longer on all 38 classes with a GPU, is what would power a production version of AgriScan.</p>
+    </div>
+    <div class="scan-panel">
+      <div class="capture-side">
+        <h3>1. Add a photo</h3>
+        <p>Use your camera on mobile, or drop an existing photo of the leaf.</p>
+        <div id="modelStatus" class="model-status loading">🔄 Loading CNN model...</div>
+        <div class="model-note"><strong>About this model:</strong> a real 5-layer CNN (~2.9M parameters), trained from scratch and exported to ONNX. This particular checkpoint was trained on a small 10-class, 100-images-per-class slice of PlantVillage for 10 epochs on a single CPU core (~55% validation accuracy) — enough to prove the pipeline genuinely learns, not a placeholder. It recognizes the 10 classes listed below, not the full 38-class PlantVillage set.</div>
+        <label class="dropzone" id="dropzone">
+          <input type="file" accept="image/*" capture="environment" id="fileInput">
+          <div id="dropzoneEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16.5V19a2 2 0 002 2h12a2 2 0 002-2v-2.5M7 9l5-5 5 5M12 4v13"/></svg>
+            <strong>Tap to capture or upload</strong>
+            <span>JPG or PNG · one leaf, filling the frame</span>
+          </div>
+          <div class="preview-wrap" id="previewWrap" style="display:none;">
+            <img id="previewImg" alt="Uploaded leaf photo">
+            <div class="sweep-line" id="sweepLine"></div>
+          </div>
+        </label>
+        <div class="capture-buttons">
+          <button class="btn-small" id="analyzeBtn" disabled>Analyze photo</button>
+          <button class="btn-small secondary" id="clearBtn" disabled>Clear</button>
+        </div>
+      </div>
+      <div class="result-side">
+        <h3>2. Diagnosis</h3>
+        <div class="result-empty" id="resultEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z"/></svg>
+          <span>Your result will appear here once you analyze a photo.</span>
+        </div>
+        <div class="analyzing" id="analyzingState" style="display:none;">
+          <div class="ring"></div>
+          <p id="analyzingText">RUNNING CNN FORWARD PASS...</p>
+        </div>
+        <div class="diagnosis" id="diagnosis">
+          <div class="diag-top">
+            <div class="diag-name" id="diagName">—</div>
+            <div class="diag-badge" id="diagBadge">—</div>
+          </div>
+          <div class="confidence-row">
+            <div class="label"><span>CONFIDENCE (SOFTMAX)</span><span id="confVal">0%</span></div>
+            <div class="confidence-bar"><div class="confidence-fill" id="confFill"></div></div>
+          </div>
+          <p class="diag-desc" id="diagDesc"></p>
+          <div class="diag-list">
+            <h4>Recommended actions</h4>
+            <ul id="diagActions"></ul>
+          </div>
+          <div class="diag-alts" id="diagAlts"></div>
+          <button class="btn-small secondary rescan-btn" id="rescanBtn">Scan another photo</button>
+          <div class="diag-footnote">Powered by a real CNN (PyTorch → ONNX), running fully on-device in your browser. This is a small demo checkpoint — for a confirmed diagnosis, consult your local agricultural extension office.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="library">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">What this checkpoint recognizes</div>
+      <h2>10 classes from the PlantVillage dataset</h2>
+      <p>The full pipeline (see <code class="mono">src/train.py</code>) supports all 38 PlantVillage classes across 14 crops — this in-browser demo ships with a lightweight checkpoint trained on the 10 classes below.</p>
+    </div>
+    <div class="lib-grid" id="libGrid"></div>
+  </div>
+</section>
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-logo">
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M12 2C8 6 4 9 4 14a8 8 0 0016 0c0-5-4-8-8-12z" stroke="#E3B23C" stroke-width="1.5"/></svg>
+        AgriScan
+      </div>
+      <div class="footer-links">
+        <a href="#scan">Scan a leaf</a>
+        <a href="#how">How it works</a>
+        <a href="#library">Disease library</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Built for farmers who'd rather act today than wait for a diagnosis next week.</span>
+      <span>Real CNN, trained from scratch on PlantVillage, running via ONNX Runtime — not a substitute for a trained agricultural professional.</span>
+    </div>
+  </div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
